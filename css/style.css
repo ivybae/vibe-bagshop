@@ -104,6 +104,45 @@ section h2::after {
     border-radius: 8px;
     padding: 30px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    position: relative; /* For positioning controls if needed */
+}
+
+/* Carousel Controls for MD's Pick */
+#md-pick .carousel-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 400px; /* Or adjust to canvas width */
+    margin-bottom: 15px;
+}
+
+#md-pick .carousel-controls button {
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+#md-pick .carousel-controls button:hover {
+    background-color: #5a6268;
+}
+
+#md-pick .carousel-controls button:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+}
+
+#md-pick #current-model-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #343a40;
+    text-align: center;
+    flex-grow: 1;
 }
 
 #canvas-container {
@@ -111,9 +150,14 @@ section h2::after {
     max-width: 500px; /* Slightly smaller for better focus */
     height: 350px; /* Increased height */
     background-color: #e9ecef; /* Lighter placeholder background */
-    margin-bottom: 20px;
+    /* margin-bottom is removed as color options are below now */
     border-radius: 8px;
     border: 1px solid #dee2e6;
+    margin-top: 0; /* Ensure it's directly below controls */
+}
+
+#md-pick .color-options {
+    margin-top: 20px; /* Add margin above color options */
 }
 
 #md-pick .color-options {

@@ -1,147 +1,209 @@
 // Three.js scene setup for Vibe Bagshop MD's Pick
-
 console.log('Three.js scene script loaded. Waiting for DOM content.');
 
 document.addEventListener('DOMContentLoaded', () => {
     const canvasContainer = document.getElementById('canvas-container');
-    let model;
+    const prevModelButton = document.getElementById('prev-model');
+    const nextModelButton = document.getElementById('next-model');
+    const currentModelNameDisplay = document.getElementById('current-model-name');
+
+    let scene, camera, renderer, controls, currentModel;
+
+    const models = [
+        { name: 'Briefcase', path: 'assets/briefcase.glb' },
+        { name: 'Cross Bag', path: 'assets/crossbag.glb' },
+        { name: 'Woman Bag', path: 'assets/womanbag.glb' }
+    ];
+    let currentModelIndex = 0;
 
     if (canvasContainer && typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined' && typeof THREE.OrbitControls !== 'undefined') {
         console.log('THREE, GLTFLoader, and OrbitControls found, initializing scene.');
-        
-        // Scene, Camera, Renderer
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xe9ecef); // Match CSS background
+        initScene();
+        loadModel(currentModelIndex);
+        setupCarouselControls();
+    } else {
+        handleInitError();
+    }
+
+    function initScene() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe9ecef);
+
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.outputEncoding = THREE.sRGBEncoding; // For accurate colors with GLTF
+        renderer.outputEncoding = THREE.sRGBEncoding;
         canvasContainer.appendChild(renderer.domElement);
 
         camera = new THREE.PerspectiveCamera(50, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
-        camera.position.set(2, 1.5, 3); // Adjusted camera position for a typical model view
+        camera.position.set(2, 1.5, 3); // Initial position, will be adjusted by loadModel
 
-        // Controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = false;
-        controls.minDistance = 1;
-        controls.maxDistance = 10;
-        // controls.maxPolarAngle = Math.PI / 2; // Prevent looking from below
+        controls.minDistance = 0.5; // Adjusted minDistance
+        controls.maxDistance = 20;  // Adjusted maxDistance
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
         directionalLight.position.set(5, 10, 7.5);
-        directionalLight.castShadow = true; // If you want shadows
         scene.add(directionalLight);
-
-        const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
+        const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.6);
         scene.add(hemisphereLight);
 
-        // GLTF Loader
-        const loader = new THREE.GLTFLoader();
-        loader.load(
-            'assets/briefcase.glb',
-            function (gltf) {
-                model = gltf.scene;
-                console.log('GLTF model loaded:', model);
+        window.addEventListener('resize', onWindowResize);
+        animate();
+    }
 
-                // Optional: Scale and position the model if needed
-                // model.scale.set(0.1, 0.1, 0.1);
-                // model.position.y = -0.5; 
-
-                // Center the model and adjust camera
-                const box = new THREE.Box3().setFromObject(model);
-                const center = box.getCenter(new THREE.Vector3());
-                model.position.sub(center); // Center model at origin
-                
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const fov = camera.fov * (Math.PI / 180);
-                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-                cameraZ *= 1.5; // Add some padding
-                camera.position.z = cameraZ;
-                camera.position.y = size.y / 2; // Look at the center of the model height
-
-                controls.target.copy(model.position); // Ensure controls target the model center
-                controls.update();
-
-                scene.add(model);
-                console.log('Model added to scene.');
-            },
-            function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            },
-            function (error) {
-                console.error('An error happened during GLTF loading:', error);
-                // Display an error message in the canvas
-                const errorMsg = document.createElement('p');
-                errorMsg.textContent = 'Error loading 3D model. Please check console.';
-                errorMsg.style.color = 'red';
-                errorMsg.style.textAlign = 'center';
-                canvasContainer.innerHTML = ''; // Clear previous content
-                canvasContainer.appendChild(errorMsg);
-            }
-        );
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update(); // only required if controls.enableDamping or controls.autoRotate are set to true
-            renderer.render(scene, camera);
+    function loadModel(index) {
+        if (currentModel) {
+            scene.remove(currentModel);
+            // Dispose of old model's geometry and material if necessary to free up memory
+            // currentModel.traverse(child => { ... });
         }
 
-        animate();
+        const modelInfo = models[index];
+        if (!modelInfo) {
+            console.error('Invalid model index:', index);
+            return;
+        }
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
+        currentModelNameDisplay.textContent = 'Loading...';
+        prevModelButton.disabled = true;
+        nextModelButton.disabled = true;
+
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+            modelInfo.path,
+            (gltf) => {
+                currentModel = gltf.scene;
+                console.log(`GLTF model '${modelInfo.name}' loaded:`, currentModel);
+
+                const box = new THREE.Box3().setFromObject(currentModel);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+
+                currentModel.position.sub(center); // Center model at origin
+
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = camera.fov * (Math.PI / 180);
+                let cameraZ = Math.abs(maxDim / 1.5 / Math.tan(fov / 2)); // Adjust divisor for closer/further view
+                cameraZ = Math.max(cameraZ, maxDim); // Ensure camera is not too close
+                
+                camera.position.set(0, 0 , cameraZ * 1.2); // Position camera, Y set to 0 initially
+                camera.lookAt(0,0,0); // Look at the model's origin
+
+                controls.target.set(0, 0, 0); // Set orbit controls target to model's origin
+                controls.update();
+
+                // Adjust material properties for specific models
+                if (modelInfo.name === 'Cross Bag') {
+                    currentModel.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            const materials = Array.isArray(child.material) ? child.material : [child.material];
+                            materials.forEach(mat => {
+                                if (mat.isMeshStandardMaterial) {
+                                    mat.metalness *= 0.5; // Reduce metalness to make it less shiny/bright
+                                    mat.roughness = Math.min(1.0, mat.roughness + 0.3); // Increase roughness
+                                }
+                            });
+                        }
+                    });
+                } else if (modelInfo.name === 'Woman Bag') {
+                    currentModel.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            const materials = Array.isArray(child.material) ? child.material : [child.material];
+                            materials.forEach(mat => {
+                                if (mat.isMeshStandardMaterial) {
+                                    mat.roughness *= 0.6; // Decrease roughness to make it a bit shinier
+                                    // If still too dark, consider a slight color boost:
+                                    // mat.color.multiplyScalar(1.1);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                scene.add(currentModel);
+                console.log(`Model '${modelInfo.name}' added to scene.`);
+                currentModelNameDisplay.textContent = modelInfo.name;
+                updateCarouselButtons();
+            },
+            (xhr) => {
+                console.log(`${modelInfo.name}: ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
+            },
+            (error) => {
+                console.error(`An error happened during GLTF loading for ${modelInfo.name}:`, error);
+                currentModelNameDisplay.textContent = `Error: ${modelInfo.name}`;
+                canvasContainer.innerHTML = `<p style="color:red; text-align:center;">Error loading ${modelInfo.name}.</p>`;
+                updateCarouselButtons();
+            }
+        );
+    }
+
+    function setupCarouselControls() {
+        prevModelButton.addEventListener('click', () => {
+            currentModelIndex = (currentModelIndex - 1 + models.length) % models.length;
+            loadModel(currentModelIndex);
+        });
+
+        nextModelButton.addEventListener('click', () => {
+            currentModelIndex = (currentModelIndex + 1) % models.length;
+            loadModel(currentModelIndex);
+        });
+        updateCarouselButtons(); // Initial button state
+    }
+    
+    function updateCarouselButtons() {
+        // prevModelButton.disabled = currentModelIndex === 0;
+        // nextModelButton.disabled = currentModelIndex === models.length - 1;
+        // Enable both buttons for circular carousel
+        prevModelButton.disabled = false;
+        nextModelButton.disabled = false;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if (controls) controls.update();
+        if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+        if (camera && renderer && canvasContainer) {
             camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-        });
-
-        // Expose a function to change bag color
-        // This will need to be adjusted based on the actual GLTF model structure
-        window.changeBagColor = function(color) {
-            if (model) {
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        // This is a basic implementation. You might need to target specific meshes
-                        // or materials by name if the model is complex.
-                        if (child.material && child.material.isMeshStandardMaterial) {
-                            child.material.color.set(color);
-                            console.log(`Changed color of mesh '${child.name}' to: ${color}`);
-                        } else if (Array.isArray(child.material)) {
-                            child.material.forEach(mat => {
-                                if (mat.isMeshStandardMaterial) mat.color.set(color);
-                            });
-                            console.log(`Changed color of multi-material mesh '${child.name}' to: ${color}`);
-                        } else {
-                            console.warn(`Mesh '${child.name}' does not have a standard material or material array to change color.`);
-                        }
-                    }
-                });
-            } else {
-                console.warn('Model not loaded yet, cannot change color.');
-            }
         }
+    }
 
-        // Link color buttons (already in main.js, but can be re-linked here if preferred)
-        // Ensure main.js calls window.changeBagColor
+    window.changeBagColor = function(color) {
+        if (currentModel) {
+            currentModel.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.material && child.material.isMeshStandardMaterial) {
+                        child.material.color.set(color);
+                    } else if (Array.isArray(child.material)) {
+                        child.material.forEach(mat => {
+                            if (mat.isMeshStandardMaterial) mat.color.set(color);
+                        });
+                    }
+                }
+            });
+        } else {
+            console.warn('Model not loaded yet, cannot change color.');
+        }
+    };
 
-        console.log('Three.js scene initialized for GLTF model.');
-
-    } else {
+    function handleInitError() {
         let errorText = '';
         if (!canvasContainer) errorText += 'Canvas container #canvas-container not found. ';
         if (typeof THREE === 'undefined') errorText += 'Three.js library not loaded. ';
         if (typeof THREE.GLTFLoader === 'undefined') errorText += 'GLTFLoader not loaded. ';
         if (typeof THREE.OrbitControls === 'undefined') errorText += 'OrbitControls not loaded. ';
         console.error(errorText);
-        if(canvasContainer) canvasContainer.textContent = 'Error initializing 3D viewer: ' + errorText;
+        if (canvasContainer) canvasContainer.innerHTML = `<p style="color:red; text-align:center;">Error initializing 3D viewer: ${errorText}</p>`;
     }
+
+    console.log('Three.js scene script initialized for GLTF carousel.');
 });
