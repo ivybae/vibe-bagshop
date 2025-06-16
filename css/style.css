@@ -1,0 +1,227 @@
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #343a40;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header & Navigation */
+header {
+    background-color: #ffffff;
+    color: #343a40;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav .logo a {
+    color: #007bff; /* Primary color for logo */
+    text-decoration: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 25px;
+}
+
+nav ul li a {
+    color: #343a40;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover, nav ul li a.active {
+    color: #007bff;
+}
+
+/* Main Content */
+main {
+    padding-top: 30px; /* Add padding to offset sticky header */
+}
+
+section {
+    margin-bottom: 60px;
+    padding: 40px 0;
+}
+
+section:last-of-type {
+    border-bottom: none;
+}
+
+section h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.2rem;
+    color: #343a40;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: #007bff;
+}
+
+/* MD's Pick Section */
+#md-pick .showcase-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+#canvas-container {
+    width: 100%;
+    max-width: 500px; /* Slightly smaller for better focus */
+    height: 350px; /* Increased height */
+    background-color: #e9ecef; /* Lighter placeholder background */
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+#md-pick .color-options {
+    margin-top: 10px;
+}
+
+#md-pick .color-options button {
+    padding: 12px 20px;
+    margin: 0 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border-radius: 25px; /* Pill shape */
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#md-pick .color-options button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+#md-pick .color-options button.active {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Popular Items Section */
+#popular-items .slider-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+    padding: 20px 5px; /* Add some padding for items near edges */
+    /* Removing border and background, let items define the look */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #007bff #e9ecef; /* For Firefox */
+}
+
+/* Webkit scrollbar styling */
+#popular-items .slider-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+#popular-items .slider-container::-webkit-scrollbar-track {
+    background: #e9ecef;
+    border-radius: 10px;
+}
+
+#popular-items .slider-container::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 10px;
+    border: 2px solid #e9ecef; 
+}
+
+#popular-items .slider-item {
+    min-width: 220px; /* Larger items */
+    height: 300px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column; /* For potential text later */
+    align-items: center;
+    justify-content: center; /* Center placeholder text */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+#popular-items .slider-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+#popular-items .view-more {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 25px;
+    background-color: #28a745; /* Green for 'View More' */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 25px; /* Pill shape */
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#popular-items .view-more:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 30px 0;
+    background-color: #343a40;
+    color: #f8f9fa;
+    margin-top: 60px;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Bagshop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="#">Vibe Bagshop</a>
+            </div>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#deals">Deals</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="md-pick">
+            <h2>MD's Pick</h2>
+            <div class="showcase-container">
+                <div id="canvas-container"></div>
+                <div class="color-options">
+                    <button data-color="#FF0000">Red</button>
+                    <button data-color="#00FF00">Green</button>
+                    <button data-color="#0000FF">Blue</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="popular-items">
+            <h2>Popular Items</h2>
+            <div class="slider-container">
+                <!-- Slider items will be added here -->
+                <div class="slider-item">Product 1</div>
+                <div class="slider-item">Product 2</div>
+                <div class="slider-item">Product 3</div>
+                <div class="slider-item">Product 4</div>
+                <div class="slider-item">Product 5</div>
+                <div class="slider-item">Product 6</div>
+            </div>
+            <button class="view-more">더보기</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Vibe Bagshop. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
